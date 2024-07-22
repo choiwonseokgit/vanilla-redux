@@ -1,47 +1,43 @@
-import { combineReducers, legacy_createStore } from "redux";
-import storage from "redux-persist/lib/storage";
-import { persistReducer } from "redux-persist";
+import {
+  createAction,
+  createReducer,
+  configureStore,
+  createSlice,
+} from "@reduxjs/toolkit";
 
-const ADD = "ADD";
-const DELETE = "DELETE";
+// const reducer = createReducer([], {
+//     [addToDo]: (state, action) => {
+//       state.unshift({ text: action.payload.text, id: action.payload.id });
+//     },
+//     [deleteToDo]: (state, action) =>
+//       state.filter((toDo) => toDo.id !== action.payload),
+//   });
 
-const addToDo = (text) => {
-  return {
-    type: ADD,
-    text,
-  };
-};
+// const reducer = createReducer([], (builder) => {
+//   builder
+//     .addCase(addToDo, (state, action) => {
+//       state.unshift({ text: action.payload, id: Date.now() });
+//     })
+//     .addCase(deleteToDo, (state, action) => {
+//       return state.filter((toDo) => toDo.id !== action.payload);
+//     });
+// });
 
-const deleteToDo = (id) => {
-  return {
-    type: DELETE,
-    id: parseInt(id),
-  };
-};
-
-const reducer = (state = [], action) => {
-  switch (action.type) {
-    case ADD:
-      return [{ text: action.text, id: Date.now() }, ...state];
-    case DELETE:
-      return state.filter((toDo) => toDo.id !== action.id);
-    default:
-      return state;
-  }
-};
-const persistConfig = {
-  key: "toDo",
-  storage: storage,
-};
-const allReducer = combineReducers({
-  reducer,
+const toDos = createSlice({
+  name: "toDosReducer",
+  initialState: [],
+  reducers: {
+    add: (state, action) => {
+      state.unshift({ text: action.payload.text, id: action.payload.id });
+    },
+    remove: (state, action) => {
+      return state.filter((toDo) => toDo.id !== action.payload);
+    },
+  },
 });
 
-const store = legacy_createStore(persistReducer(persistConfig, allReducer));
+const store = configureStore({ reducer: toDos.reducer });
 
-export const actionCreators = {
-  addToDo,
-  deleteToDo,
-};
+export const { add, remove } = toDos.actions;
 
 export default store;
